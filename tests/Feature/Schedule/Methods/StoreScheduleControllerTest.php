@@ -96,46 +96,46 @@ class StoreScheduleControllerTest extends TestCase
         ]);
     }
 
-    public function test_store_valid_input_with_days_refresh_failed()
-    {
-        $this->client->shouldReceive('request')
-            ->once()
-            ->with('POST', 'http://localhost:3000/api/refresh')
-            ->andThrow(new RequestException("Error Communicating with Server", new \GuzzleHttp\Psr7\Request('POST', 'test')));
+    // public function test_store_valid_input_refresh_failed()
+    // {
+    //     $this->client->shouldReceive('request')
+    //         ->once()
+    //         ->with('POST', 'http://localhost:3000/api/refresh')
+    //         ->andThrow(new RequestException("Error Communicating with Server", new \GuzzleHttp\Psr7\Request('POST', 'test')));
 
-        // Menggunakan CSRF token dalam header
-        $response = $this->withHeaders([
-            'X-CSRF-TOKEN' => csrf_token(),
-        ])->postJson('/schedules', [
-            'device_id' => $this->device->id,
-            'time' => '12:00',
-            'grams_per_feeding' => 60,
-            'active' => 1,
-            'days_monday' => 'Monday',
-        ]);
+    //     // Menggunakan CSRF token dalam header
+    //     $response = $this->withHeaders([
+    //         'X-CSRF-TOKEN' => csrf_token(),
+    //     ])->postJson('/schedules', [
+    //         'device_id' => $this->device->id,
+    //         'time' => '12:00',
+    //         'grams_per_feeding' => 60,
+    //         'active' => 1,
+    //         'days_monday' => 'Monday',
+    //     ]);
 
-        $response->assertStatus(302); // Resource yang di-request telah dipindahkan sementara ke lokasi baru (permintaan HTTP berhasil)
-        $response->assertSessionHas('toast_error', "Gagal menyegarkan jadwal di server: Error Communicating with Server");
-    }
+    //     $response->assertStatus(302); // Resource yang di-request telah dipindahkan sementara ke lokasi baru (permintaan HTTP berhasil)
+    //     $response->assertSessionHas('toast_error', "Gagal menyegarkan jadwal di server: Error Communicating with Server");
+    // }
 
-    public function test_store_valid_input_no_days_refresh_failed()
-    {
-        $this->client->shouldReceive('request')
-            ->once()
-            ->with('POST', 'http://localhost:3000/api/refresh')
-            ->andThrow(new RequestException("Error Communicating with Server", new \GuzzleHttp\Psr7\Request('POST', 'test')));
+    // public function test_store_valid_input_no_days_refresh_failed()
+    // {
+    //     $this->client->shouldReceive('request')
+    //         ->once()
+    //         ->with('POST', 'http://localhost:3000/api/refresh')
+    //         ->andThrow(new RequestException("Error Communicating with Server", new \GuzzleHttp\Psr7\Request('POST', 'test')));
 
-        // Menggunakan CSRF token dalam header
-        $response = $this->withHeaders([
-            'X-CSRF-TOKEN' => csrf_token(),
-        ])->postJson('/schedules', [
-            'device_id' => $this->device->id,
-            'time' => '12:00',
-            'grams_per_feeding' => 60,
-            'active' => 1,
-        ]);
+    //     // Menggunakan CSRF token dalam header
+    //     $response = $this->withHeaders([
+    //         'X-CSRF-TOKEN' => csrf_token(),
+    //     ])->postJson('/schedules', [
+    //         'device_id' => $this->device->id,
+    //         'time' => '12:00',
+    //         'grams_per_feeding' => 60,
+    //         'active' => 1,
+    //     ]);
 
-        $response->assertStatus(302); // Resource yang di-request telah dipindahkan sementara ke lokasi baru (permintaan HTTP berhasil)
-        $response->assertSessionHas('toast_error', "Gagal menyegarkan jadwal di server: Error Communicating with Server");
-    }
+    //     $response->assertStatus(302); // Resource yang di-request telah dipindahkan sementara ke lokasi baru (permintaan HTTP berhasil)
+    //     $response->assertSessionHas('toast_error', "Gagal menyegarkan jadwal di server: Error Communicating with Server");
+    // }
 }

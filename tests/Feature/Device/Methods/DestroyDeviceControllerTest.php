@@ -9,10 +9,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-use Illuminate\Support\Facades\Log;
+use GuzzleHttp\Psr7\Response;
 use Mockery;
 
-class DestroyScheduleControllerTest extends TestCase
+class DestroyDeviceControllerTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -33,9 +33,15 @@ class DestroyScheduleControllerTest extends TestCase
         $this->startSession(); // Ensure the session is started
     }
 
-    public function test_destroy()
+    public function test_destroy_successful()
     {
-        $schedule = Schedule::factory()->create(['device_id' => $this->device->id]);
+        $device = Device::factory()->create(['user_id' => $this->user->id]);
+        $schedule = Schedule::factory()->create([
+            'device_id' => $device->id,
+            'time' => '12:00',
+            'grams_per_feeding' => 60,
+            'active' => 1,
+        ]);
 
         // // Debugging: Check session data
         // $sessionData = session()->all();
@@ -44,9 +50,10 @@ class DestroyScheduleControllerTest extends TestCase
         // Menggunakan CSRF token dalam header
         $response = $this->withHeaders([
             'X-CSRF-TOKEN' => csrf_token(),
-        ])->deleteJson('/schedules/' . $schedule->id .'/delete');
+        ])->deleteJson('/devices/' . $device->id .'/delete');
 
         $response->assertStatus(302); // Resource yang di-request telah dipindahkan sementara ke lokasi baru (permintaan HTTP berhasil)
+        $this->assertDatabaseMissing($device); // Memastikan data tidak ada di database
         $this->assertDatabaseMissing($schedule); // Memastikan data tidak ada di database
     }
 
@@ -57,15 +64,15 @@ class DestroyScheduleControllerTest extends TestCase
     //         ->with('POST', 'http://localhost:3000/api/refresh')
     //         ->andThrow(new RequestException("Error Communicating with Server", new \GuzzleHttp\Psr7\Request('POST', 'test')));
 
-    //     $schedule = Schedule::factory()->create(['device_id' => $this->device->id]);
+    //     $device = Device::factory()->create(['user_id' => $this->user->id]);
 
     //     // Menggunakan CSRF token dalam header
     //     $response = $this->withHeaders([
     //         'X-CSRF-TOKEN' => csrf_token(),
-    //     ])->deleteJson('/schedules/' . $schedule->id .'/delete');
+    //     ])->deleteJson('/devices/' . $device->id .'/delete');
 
     //     $response->assertStatus(302); // Resource yang di-request telah dipindahkan sementara ke lokasi baru (permintaan HTTP berhasil)
-    //     $this->assertDatabaseMissing($schedule); // Memastikan data tidak ada di database
+    //     $this->assertDatabaseMissing($device); // Memastikan data tidak ada di database
 
     //     $response->assertSessionHas('toast_error', "Gagal menyegarkan jadwal di server: Error Communicating with Server");
     // }

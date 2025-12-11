@@ -13,6 +13,12 @@ use RealRashid\SweetAlert\Facades\Alert;
 
 class DeviceController extends Controller
 {
+    protected $client;
+    public function __construct(Client $client)
+    {
+        $this->client = $client;
+    }
+
     public function index()
     {
         // $title = 'Hapus Data?';
@@ -50,7 +56,19 @@ class DeviceController extends Controller
         
         Device::create($validateData);
 
-        return redirect()->route('devices.index')->with('toast_success', "Data {$validateData['name']} berhasil ditambahkan");
+        // return redirect()->route('devices.index')->with('toast_success', "Data {$validateData['name']} berhasil ditambahkan");
+        try {
+            // $client = new Client();
+            $res = $this->client->request('POST', 'http://localhost:3000/api/refresh');
+            
+            if ($res->getStatusCode() == 200) {
+                return redirect()->route('devices.index')->with('toast_success', "Data {$validateData['name']} berhasil ditambahkan");
+            } else {
+                return redirect()->route('devices.index')->with('toast_error', "Gagal menyegarkan jadwal di server");
+            }
+        } catch (\Throwable $th) {
+            return redirect()->route('devices.index')->with('toast_error', "Gagal menyegarkan jadwal di server: " . $th->getMessage());
+        }
     }
     public function edit(Device $device)
     {
@@ -83,7 +101,20 @@ class DeviceController extends Controller
         ]);
 
         $device->update($validateData);
-        return redirect()->route('devices.index', ['device' => $device->id])->with('toast_success', "Data {$validateData['name']} berhasil diperbarui");
+
+        // return redirect()->route('devices.index', ['device' => $device->id])->with('toast_success', "Data {$validateData['name']} berhasil diperbarui");
+        try {
+            // $client = new Client();
+            $res = $this->client->request('POST', 'http://localhost:3000/api/refresh');
+            
+            if ($res->getStatusCode() == 200) {
+                return redirect()->route('devices.index', ['device' => $device->id])->with('toast_success', "Data {$validateData['name']} berhasil diperbarui");
+            } else {
+                return redirect()->route('devices.index')->with('toast_error', "Gagal menyegarkan jadwal di server");
+            }
+        } catch (\Throwable $th) {
+            return redirect()->route('devices.index')->with('toast_error', "Gagal menyegarkan jadwal di server: " . $th->getMessage());
+        }
     }
     public function destroy(Device $device)
     {
@@ -92,8 +123,8 @@ class DeviceController extends Controller
         $device->delete();
 
         try {
-            $client = new Client();
-            $res = $client->request('POST', 'http://localhost:3000/api/refresh');
+            // $client = new Client();
+            $res = $this->client->request('POST', 'http://localhost:3000/api/refresh');
     
             if ($res->getStatusCode() == 200) {
                 return redirect()->route('devices.index')->with('toast_success', "Data $deviceName berhasil berhasil dihapus");
@@ -175,8 +206,8 @@ class DeviceController extends Controller
         $deviceName = $device->name;
         $device->delete();
         try {
-            $client = new Client();
-            $res = $client->request('POST', 'http://localhost:3000/api/refresh');
+            // $client = new Client();
+            $res = $this->client->request('POST', 'http://localhost:3000/api/refresh');
     
             if ($res->getStatusCode() == 200) {
                 return redirect()->route('devices.simple')->with('toast_success', "Data $deviceName berhasil berhasil dihapus");
